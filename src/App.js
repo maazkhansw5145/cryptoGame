@@ -22,7 +22,7 @@ function App() {
             </Routes>
           </Router>
         </PersistGate>
-        <ToastContainer toastStyle={{ backgroundColor: "rgb(255, 213, 0)" }} />
+        <ToastContainer toastStyle={{ backgroundColor: "brown" }} />
       </Provider>
     </div>
   );

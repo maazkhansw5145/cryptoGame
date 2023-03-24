@@ -9,7 +9,12 @@ const initialState = {
   isAuthenticated: null,
   msg: null,
   user: null,
-  balance: 5,
+  balance: {
+    "USDT":0.00,
+    "ETH":0.00,
+    "Polygon":0.00,
+    "BTC":0.00
+  },
 };
 
 // eslint-disable-next-line import/no-anonymous-default-export

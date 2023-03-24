@@ -6,6 +6,7 @@ import Box from "@mui/material/Box";
 
 import Signup from "../pages/authentication/signup";
 import Login from "../pages/authentication/login";
+import Wallet from "./Wallet";
 
 const style = {
   position: "absolute",
@@ -19,7 +20,6 @@ const style = {
   maxWidth: 600,
   border: "2px solid #000",
   boxShadow: 24,
-  p: 4,
   background: "black",
 };
 
@@ -40,8 +40,10 @@ export default function TransitionsModal(props) {
         <Box sx={{ ...style }}>
           {props.for === "login" ? (
             <Login setFor={props.setFor} />
-          ) : (
+          ) : props.for === "signup" ? (
             <Signup setFor={props.setFor} />
+          ):(
+            <Wallet close={() => props.setOpen(false)} />
           )}
         </Box>
       </Modal>

@@ -19,16 +19,17 @@ import { ArrowDropDown, Casino } from "@mui/icons-material";
 import Loading from "./Loading";
 import RocketLaunchIcon from "@mui/icons-material/RocketLaunch";
 import TransitionsModal from "./TransitionModal";
-
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 function Header(props) {
   const [open, setOpen] = useState(false);
   const [openCoinsMenu, setOpenCoinsMenu] = useState(false);
   const [selectedCoin, setSelectedCoin] = useState("BTC");
-  const [loading, setLoading] = useState(false);
   const [anchorElUser, setAnchorElUser] = useState(null);
 
   const [openModal, setOpenModal] = useState(false);
   const [openModalFor, setOpenModalFor] = useState("login");
+  const [loading, setLoading] = useState(false);
+
   console.log(props);
   useEffect(() => {
     if (!props.auth.isAuthenticated) {
@@ -162,91 +163,158 @@ function Header(props) {
             </Box>
 
             {props.auth.isAuthenticated && (
-              <div style={{ marginLeft: 40 }}>
-                <Box
-                  onClick={(e) => {
-                    setAnchorEl(e.currentTarget);
+              <>
+                <div style={{ marginLeft: 40 }}>
+                  <Box
+                    onClick={(e) => {
+                      setAnchorEl(e.currentTarget);
 
-                    setOpenCoinsMenu(true);
-                  }}
-                >
-                  <div
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      cursor: "pointer",
+                      setOpenCoinsMenu(true);
                     }}
                   >
-                    <img
-                      src="/bitcoinIcon.png"
-                      width={20}
-                      height={20}
-                      alt="bitcoin"
-                    />
-                    <div style={{ marginLeft: 10 }}>
-                      <p
-                        style={{
-                          color: "gray",
-                          display: "flex",
-                          marginBottom: 0,
-                        }}
-                      >
-                        {selectedCoin} <ArrowDropDown />
-                      </p>
-                      <p style={{ fontWeight: 700, marginTop: 0 }}>5.00</p>
+                    <div
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        cursor: "pointer",
+                      }}
+                    >
+                      {selectedCoin === "BTC" ? (
+                        <img
+                          src="/bitcoinIcon.png"
+                          width={20}
+                          height={20}
+                          alt="bitcoin"
+                        />
+                      ) : selectedCoin === "ETH" ? (
+                        <img
+                          src="/ethereumIcon.png"
+                          width={20}
+                          height={20}
+                          alt="Ethereum"
+                        />
+                      ) : selectedCoin === "Polygon" ? (
+                        <img
+                          src="/polygonIcon.png"
+                          width={20}
+                          height={20}
+                          alt="Polygon"
+                        />
+                      ) : (
+                        <img
+                          src="/USDTIcon.png"
+                          width={20}
+                          height={20}
+                          alt="USDT"
+                        />
+                      )}
+
+                      <div style={{ marginLeft: 10 }}>
+                        <p
+                          style={{
+                            color: "gray",
+                            display: "flex",
+                            marginBottom: 0,
+                          }}
+                        >
+                          {selectedCoin} <ArrowDropDown />
+                        </p>
+                        <p style={{ fontWeight: 700, marginTop: 0 }}>
+                          {props.auth.balance.selectedCoin}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                </Box>
-                <Menu
-                  sx={{ mt: "45px" }}
-                  id="menu-appbar"
-                  anchorEl={anchorEl}
-                  anchorOrigin={{
-                    vertical: "top",
-                    horizontal: "center",
+                  </Box>
+                  <Menu
+                    id="menu-appbar"
+                    anchorEl={anchorEl}
+                    open={Boolean(openCoinsMenu)}
+                    onClose={() => setOpenCoinsMenu(!openCoinsMenu)}
+                  >
+                    <MenuItem
+                      onClick={() => {
+                        setSelectedCoin("BTC");
+                        setOpenCoinsMenu(false);
+                      }}
+                    >
+                      <img
+                        src="/bitcoinIcon.png"
+                        width={20}
+                        height={20}
+                        alt="bitcoin"
+                        style={{
+                          marginRight: 10,
+                        }}
+                      />
+                      BTC
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        setSelectedCoin("ETH");
+                        setOpenCoinsMenu(false);
+                      }}
+                    >
+                      <img
+                        src="/ethereumIcon.png"
+                        width={20}
+                        height={20}
+                        alt="Ethereum"
+                        style={{ marginRight: 10 }}
+                      />{" "}
+                      ETH
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        setSelectedCoin("Polygon");
+                        setOpenCoinsMenu(false);
+                      }}
+                    >
+                      <img
+                        src="/polygonIcon.png"
+                        width={20}
+                        height={20}
+                        alt="Polygon"
+                        style={{ marginRight: 10 }}
+                      />{" "}
+                      Polygon
+                    </MenuItem>
+                    <MenuItem
+                      onClick={() => {
+                        setSelectedCoin("USDT");
+                        setOpenCoinsMenu(false);
+                      }}
+                    >
+                      <img
+                        src="/USDTIcon.png"
+                        width={20}
+                        height={20}
+                        style={{ marginRight: 10 }}
+                        alt="USDT"
+                      />
+                      USDT
+                    </MenuItem>
+                  </Menu>
+                </div>
+
+                <div
+                  onClick={() => {
+                    setOpenModal(true);
+                    setOpenModalFor("wallet");
                   }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "center",
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    marginLeft: 20,
+                    background: "blueviolet",
+                    padding: 10,
+                    borderRadius: 10,
+                    cursor: "pointer",
                   }}
-                  open={Boolean(openCoinsMenu)}
-                  onClose={() => setOpenCoinsMenu(!openCoinsMenu)}
                 >
-                  <MenuItem
-                    onClick={() => {
-                      setSelectedCoin("BTC");
-                      setOpenCoinsMenu(false);
-                    }}
-                  >
-                    BTC
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      setSelectedCoin("ETH");
-                      setOpenCoinsMenu(false);
-                    }}
-                  >
-                    ETH
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      setSelectedCoin("DOGE");
-                      setOpenCoinsMenu(false);
-                    }}
-                  >
-                    DOGE
-                  </MenuItem>
-                  <MenuItem
-                    onClick={() => {
-                      setSelectedCoin("USDT");
-                      setOpenCoinsMenu(false);
-                    }}
-                  >
-                    USDT
-                  </MenuItem>
-                </Menu>
-              </div>
+                  <AccountBalanceWalletIcon />
+                  <p style={{ margin: "0 0 0 10px" }}>Wallet</p>
+                </div>
+              </>
             )}
 
             <Box sx={{ flexGrow: 1 }} />
@@ -301,7 +369,7 @@ function Header(props) {
                   </Box>
                 </span>
               ) : (
-                <div style={{padding:10}}>
+                <div style={{ padding: 10 }}>
                   <IconButton
                     size="large"
                     aria-label="show 4 new mails"
@@ -314,7 +382,7 @@ function Header(props) {
                   >
                     <Typography>Sign in</Typography>
                   </IconButton>
-                  <IconButton
+                  {/* <IconButton
                     size="large"
                     style={{
                       marginRight: 10,
@@ -327,7 +395,7 @@ function Header(props) {
                     }}
                   >
                     <Typography>Sign up</Typography>
-                  </IconButton>
+                  </IconButton> */}
                 </div>
               )}
             </div>
