@@ -9,11 +9,12 @@ import { createClient } from "@supabase/supabase-js";
 import { Facebook, Google } from "@mui/icons-material";
 import styles from "./socialLinks.module.css";
 import { toast } from "react-toastify";
+import { gapi } from "gapi-script";
 
-const supabase = createClient(
-  "https://dmmjiwtnypxeuxqjgtrk.supabase.co",
-  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtbWppd3RueXB4ZXV4cWpndHJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzU0NTcyNDYsImV4cCI6MTk5MTAzMzI0Nn0.ro-zLw-vI5u_Yp7uqwxAJ0pR7mLiaZCldBXvc-Z0TNE"
-);
+// const supabase = createClient(
+//   "https://dmmjiwtnypxeuxqjgtrk.supabase.co",
+//   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtbWppd3RueXB4ZXV4cWpndHJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzU0NTcyNDYsImV4cCI6MTk5MTAzMzI0Nn0.ro-zLw-vI5u_Yp7uqwxAJ0pR7mLiaZCldBXvc-Z0TNE"
+// );
 
 function Login(props) {
   const [password, setPassword] = useState("");
@@ -23,7 +24,9 @@ function Login(props) {
 
   const [error, setError] = useState(false);
   useEffect(() => {
-    if (props.auth.msg === "Login Successfully") {
+    if (!props.auth.isAuthenticated) {
+      handleClientLoad();
+    } else if (props.auth.msg === "Login Successfully") {
       toast.success("Logged in successfully", {
         position: "top-center",
         autoClose: 5000,
@@ -34,18 +37,85 @@ function Login(props) {
         progress: undefined,
         theme: "colored",
       });
-      props.history.push("/");
+      props.close();
+      setLoading(false);
+
+      // props.history.push("/");
     } else if (props.auth.msg === "Login Fails") {
       setLoading(false);
       setLogging(false);
     }
   }, [props.auth.msg]);
 
-  const loginWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-    });
+  const handleClientLoad = async () => {
+    await gapi.load("client:auth2", initClient);
   };
+
+  const CLIENT_ID =
+    "411418972730-p6ltamif38oak6mleqfg81s7uat4dfbk.apps.googleusercontent.com";
+  const API_KEY = "AIzaSyAB6v5n89DqLHboSyDLgwT1nm9nwhBCF1A";
+
+  const initClient = () => {
+    gapi.client
+      .init({
+        apiKey: API_KEY,
+        clientId: CLIENT_ID,
+        scope: "profile email",
+      })
+      .then(
+        () => {
+          console.log("Client loadded");
+          // Listen for sign-in state changes
+          // gapi.auth2.getAuthInstance().isSignedIn.listen(updateSigninStatus);
+          // // Handle the initial sign-in state
+          // updateSigninStatus(gapi.auth2.getAuthInstance().isSignedIn.get());
+        },
+        (error) => {
+          alert(
+            "Sorry google API is not initialized. Kindly check your internet connection and try again!"
+          );
+        }
+      );
+  };
+
+  const updateSigninStatus = async () => {
+    let isSignedIn = await gapi.auth2.getAuthInstance().isSignedIn.get();
+    if (isSignedIn) {
+      // Request access to user's email and Google Calendar
+      const token = await gapi.auth2
+        .getAuthInstance()
+        .currentUser.get()
+        .getAuthResponse().access_token;
+
+      // await gapi.auth.setToken({ access_token: token });
+      // Send access token to server for verification and session management
+      // ...
+      if (token) {
+        await fetch("https://www.googleapis.com/oauth2/v3/userinfo", {
+          headers: { Authorization: `Bearer ${token}` },
+        }).then(async (response) => {
+          const user = await response.json();
+          console.log("USER", user);
+          await props.login({
+            full_name: user.name,
+            email: user.email,
+            picture: user.picture,
+          });
+        });
+      }
+    }
+  };
+
+  const handleSignInClick = async () => {
+    setLoading(true);
+    await gapi.auth2.getAuthInstance().signIn();
+    updateSigninStatus();
+  };
+  // const loginWithGoogle = async () => {
+  //   await supabase.auth.signInWithOAuth({
+  //     provider: "google",
+  //   });
+  // };
   // const loginWithPassword = () => {
   //   setLogging(true);
   //   supabase.auth
@@ -95,7 +165,7 @@ function Login(props) {
           border: "none",
           cursor: "pointer",
         }}
-        onClick={() => loginWithGoogle()}
+        onClick={() => handleSignInClick()}
       >
         <img src="/googleIcon.png" width={20} height={20} alt="google" />
         <p style={{ color: "black", fontWeight: 600, marginLeft: 20 }}>

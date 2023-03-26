@@ -39,7 +39,7 @@ export default function TransitionsModal(props) {
       >
         <Box sx={{ ...style }}>
           {props.for === "login" ? (
-            <Login setFor={props.setFor} />
+            <Login setFor={props.setFor} close={() => props.setOpen(false)} />
           ) : props.for === "signup" ? (
             <Signup setFor={props.setFor} />
           ):(

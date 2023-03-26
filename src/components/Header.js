@@ -23,7 +23,7 @@ import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet";
 function Header(props) {
   const [open, setOpen] = useState(false);
   const [openCoinsMenu, setOpenCoinsMenu] = useState(false);
-  const [selectedCoin, setSelectedCoin] = useState("BTC");
+  const [selectedCoin, setSelectedCoin] = useState("BNB");
   const [anchorElUser, setAnchorElUser] = useState(null);
 
   const [openModal, setOpenModal] = useState(false);
@@ -31,11 +31,11 @@ function Header(props) {
   const [loading, setLoading] = useState(false);
 
   console.log(props);
-  useEffect(() => {
-    if (!props.auth.isAuthenticated) {
-      checkUser();
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (!props.auth.isAuthenticated) {
+  //     checkUser();
+  //   }
+  // }, []);
 
   let activeStyle = {
     background: "brown",
@@ -51,36 +51,36 @@ function Header(props) {
     padding: 10,
   };
 
-  const supabase = createClient(
-    "https://dmmjiwtnypxeuxqjgtrk.supabase.co",
-    "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtbWppd3RueXB4ZXV4cWpndHJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzU0NTcyNDYsImV4cCI6MTk5MTAzMzI0Nn0.ro-zLw-vI5u_Yp7uqwxAJ0pR7mLiaZCldBXvc-Z0TNE"
-  );
-  async function checkUser() {
-    setLoading(true);
-    await supabase.auth.getUser().then(async (value) => {
-      console.log("Check login", value);
-      if (value.data?.user) {
-        props.login({
-          name: value.data.user.user_metadata.full_name,
-          emailId: value.data.user.user_metadata.email,
-          picture_url: value.data.user.user_metadata.picture,
-        });
-        setLoading(false);
-        toast.success("Logged in successfully", {
-          position: "top-center",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        });
-      } else {
-        setLoading(false);
-      }
-    });
-  }
+  // const supabase = createClient(
+  //   "https://dmmjiwtnypxeuxqjgtrk.supabase.co",
+  //   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRtbWppd3RueXB4ZXV4cWpndHJrIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NzU0NTcyNDYsImV4cCI6MTk5MTAzMzI0Nn0.ro-zLw-vI5u_Yp7uqwxAJ0pR7mLiaZCldBXvc-Z0TNE"
+  // );
+  // async function checkUser() {
+  //   setLoading(true);
+  //   await supabase.auth.getUser().then(async (value) => {
+  //     console.log("Check login", value);
+  //     if (value.data?.user) {
+  //       props.login({
+  //         name: value.data.user.user_metadata.full_name,
+  //         emailId: value.data.user.user_metadata.email,
+  //         picture_url: value.data.user.user_metadata.picture,
+  //       });
+  //       setLoading(false);
+  //       toast.success("Logged in successfully", {
+  //         position: "top-center",
+  //         autoClose: 5000,
+  //         hideProgressBar: false,
+  //         closeOnClick: true,
+  //         pauseOnHover: true,
+  //         draggable: true,
+  //         progress: undefined,
+  //         theme: "colored",
+  //       });
+  //     } else {
+  //       setLoading(false);
+  //     }
+  //   });
+  // }
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleOpenUserMenu = (event) => {
@@ -91,7 +91,7 @@ function Header(props) {
   };
 
   const logout = () => {
-    supabase.auth.signOut();
+    // supabase.auth.signOut();
     props.logout();
   };
 
@@ -164,7 +164,15 @@ function Header(props) {
 
             {props.auth.isAuthenticated && (
               <>
-                <div style={{ marginLeft: 40 }}>
+                <Box
+                  sx={{
+                    marginLeft: {
+                      xs: "5px",
+                      sm: "10px",
+                      md: "40px",
+                    },
+                  }}
+                >
                   <Box
                     onClick={(e) => {
                       setAnchorEl(e.currentTarget);
@@ -179,35 +187,7 @@ function Header(props) {
                         cursor: "pointer",
                       }}
                     >
-                      {selectedCoin === "BTC" ? (
-                        <img
-                          src="/bitcoinIcon.png"
-                          width={20}
-                          height={20}
-                          alt="bitcoin"
-                        />
-                      ) : selectedCoin === "ETH" ? (
-                        <img
-                          src="/ethereumIcon.png"
-                          width={20}
-                          height={20}
-                          alt="Ethereum"
-                        />
-                      ) : selectedCoin === "Polygon" ? (
-                        <img
-                          src="/polygonIcon.png"
-                          width={20}
-                          height={20}
-                          alt="Polygon"
-                        />
-                      ) : (
-                        <img
-                          src="/USDTIcon.png"
-                          width={20}
-                          height={20}
-                          alt="USDT"
-                        />
-                      )}
+                      <img src="/bnb.png" width={40} height={40} alt="bnb" />
 
                       <div style={{ marginLeft: 10 }}>
                         <p
@@ -220,7 +200,7 @@ function Header(props) {
                           {selectedCoin} <ArrowDropDown />
                         </p>
                         <p style={{ fontWeight: 700, marginTop: 0 }}>
-                          {props.auth.balance.selectedCoin}
+                          {Number(props.auth.balance).toFixed(2)}
                         </p>
                       </div>
                     </div>
@@ -233,68 +213,23 @@ function Header(props) {
                   >
                     <MenuItem
                       onClick={() => {
-                        setSelectedCoin("BTC");
+                        setSelectedCoin("BNB");
                         setOpenCoinsMenu(false);
                       }}
                     >
                       <img
-                        src="/bitcoinIcon.png"
-                        width={20}
-                        height={20}
-                        alt="bitcoin"
+                        src="/bnb.png"
+                        width={40}
+                        height={40}
+                        alt="bnb"
                         style={{
                           marginRight: 10,
                         }}
                       />
-                      BTC
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        setSelectedCoin("ETH");
-                        setOpenCoinsMenu(false);
-                      }}
-                    >
-                      <img
-                        src="/ethereumIcon.png"
-                        width={20}
-                        height={20}
-                        alt="Ethereum"
-                        style={{ marginRight: 10 }}
-                      />{" "}
-                      ETH
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        setSelectedCoin("Polygon");
-                        setOpenCoinsMenu(false);
-                      }}
-                    >
-                      <img
-                        src="/polygonIcon.png"
-                        width={20}
-                        height={20}
-                        alt="Polygon"
-                        style={{ marginRight: 10 }}
-                      />{" "}
-                      Polygon
-                    </MenuItem>
-                    <MenuItem
-                      onClick={() => {
-                        setSelectedCoin("USDT");
-                        setOpenCoinsMenu(false);
-                      }}
-                    >
-                      <img
-                        src="/USDTIcon.png"
-                        width={20}
-                        height={20}
-                        style={{ marginRight: 10 }}
-                        alt="USDT"
-                      />
-                      USDT
+                      BNB
                     </MenuItem>
                   </Menu>
-                </div>
+                </Box>
 
                 <div
                   onClick={() => {
@@ -312,7 +247,9 @@ function Header(props) {
                   }}
                 >
                   <AccountBalanceWalletIcon />
-                  <p style={{ margin: "0 0 0 10px" }}>Wallet</p>
+                  <Box sx={{ display: { xs: "none", sm: "flex" } }}>
+                    <p style={{ margin: "0 0 0 10px" }}>Wallet</p>
+                  </Box>
                 </div>
               </>
             )}
@@ -332,7 +269,7 @@ function Header(props) {
                       <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
                         <Avatar
                           alt="User"
-                          src={props.auth.user.picture_url}
+                          src={props.auth.user.picture}
                           style={{ marginRight: 20 }}
                         />
                       </IconButton>
@@ -365,7 +302,7 @@ function Header(props) {
                     </Menu>
                   </Box>
                   <Box sx={{ display: { xs: "none", md: "flex" } }}>
-                    <Typography>{props.auth.user.name}</Typography>
+                    <Typography>{props.auth.user.full_name}</Typography>
                   </Box>
                 </span>
               ) : (

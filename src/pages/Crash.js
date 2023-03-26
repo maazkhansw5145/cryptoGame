@@ -15,6 +15,8 @@ import Lottie from "lottie-react";
 import RocketGif from "./rocket.json";
 import RocketStandbyGif from "./rocketStandby.json";
 import { TextField } from "@mui/material";
+import { addGame } from "../redux/actions/authActions";
+
 function Crash(props) {
   const [mode, setMode] = useState("Manual");
   const [payout, setPayout] = useState("1.98");
@@ -30,6 +32,18 @@ function Crash(props) {
   const [openModalFor, setOpenModalFor] = useState("login");
   const [maxNumber, setMaxNumber] = useState(0);
   const [crash, setCrash] = useState(false);
+  const [lastThreeGames, setLastThreeGames] = useState([]);
+
+  useEffect(() => {
+    if (props.auth.isAuthenticated ) {
+      const lastThreeCrashGames = props.auth.user.games
+        ? props.auth.user.games
+            .slice(-4)
+            .filter((game) => game.game === "crash")
+        : [];
+      setLastThreeGames([...lastThreeCrashGames]);
+    }
+  }, [props.auth.user]);
 
   const handleClick = () => {
     if (crash) {
@@ -37,16 +51,38 @@ function Crash(props) {
       setMaxNumber(0);
     } else {
       function getRandomNumber() {
-        const randomNum = Math.random(); // Generate a random number between 0 and 1
-        if (randomNum < 0.9) {
-          return Math.floor(Math.random() * 9) + 1; // Generate a number between 1 and 9
+        const x = Math.random(); // generate a random number between 0 and 1
+        if (x < 0.9) {
+          // 90% of the time, generate a random number between 0 and 2
+          return Math.random() * 2;
         } else {
-          return Math.floor(Math.random() * 91) + 9; // Generate a number between 9 and 100
+          // 10% of the time, generate a random number between 2 and 10
+          return 2 + Math.random() * 8;
         }
       }
       let number = 1;
       number = getRandomNumber();
       setMaxNumber(number);
+      let result = "win";
+      let balanceChange = (amount * 0.1) * number;
+      let newBalance = props.auth.user.balance;
+      console.log("payout > number", payout > number);
+      if (payout > number) {
+        newBalance = newBalance - balanceChange;
+        result = "lose";
+      } else {
+        newBalance = newBalance + balanceChange;
+      }
+      setTimeout(() => {
+        props.addGame(
+          props.auth.user._id,
+          amount,
+          result,
+          newBalance,
+          "crash",
+          number
+        );
+      }, 8000);
     }
   };
 
@@ -112,7 +148,7 @@ function Crash(props) {
                     fontSize: 12,
                   }}
                 >
-                  Bankroll BTC
+                  Bankroll BNB
                 </p>
                 &nbsp;
                 <p
@@ -123,7 +159,7 @@ function Crash(props) {
                     fontSize: 12,
                   }}
                 >
-                  BTC
+                  BNB
                 </p>
               </div>
               <p
@@ -134,7 +170,7 @@ function Crash(props) {
                   fontSize: 12,
                 }}
               >
-                Rs123123123
+                {amount}
               </p>
             </div>
 
@@ -143,7 +179,6 @@ function Crash(props) {
                 display: "flex",
                 background: "#161616",
                 padding: "0 15px",
-
                 textAlign: "center",
               }}
             >
@@ -156,7 +191,11 @@ function Crash(props) {
               >
                 <div
                   style={{
-                    background: "lawngreen",
+                    background: lastThreeGames[0]
+                      ? lastThreeGames[0].result === "win"
+                        ? "lawngreen"
+                        : "red"
+                      : "gray",
                     borderRadius: 100,
                     width: 13,
                     height: 13,
@@ -165,10 +204,20 @@ function Crash(props) {
                 />
                 <div>
                   <p style={{ color: "gray", fontSize: 13, margin: 0 }}>
-                    5687177
+                    {lastThreeGames[0] ? Number(lastThreeGames[0].amount).toFixed(4) : "N/A"}
                   </p>
-                  <p style={{ color: "lawngreen", fontSize: 13, margin: 0 }}>
-                    2.19X
+                  <p
+                    style={{
+                      color: "lawngreen",
+                      fontSize: 13,
+                      margin: 0,
+                    }}
+                  >
+                    {lastThreeGames[0]
+                      ? lastThreeGames[0].result === "win"
+                        ? Number(lastThreeGames[0].win_chances).toFixed(4)
+                        : lastThreeGames[0].amount
+                      : "N/A"}
                   </p>
                 </div>
               </span>
@@ -199,7 +248,11 @@ function Crash(props) {
               >
                 <div
                   style={{
-                    background: "lawngreen",
+                    background: lastThreeGames[1]
+                      ? lastThreeGames[1].result === "win"
+                        ? "lawngreen"
+                        : "red"
+                      : "gray",
                     borderRadius: 100,
                     width: 13,
                     height: 13,
@@ -208,10 +261,14 @@ function Crash(props) {
                 />
                 <div>
                   <p style={{ color: "gray", fontSize: 13, margin: 0 }}>
-                    5687177
+                    {lastThreeGames[1] ? Number(lastThreeGames[1].amount).toFixed(4) : "N/A"}
                   </p>
                   <p style={{ color: "lawngreen", fontSize: 13, margin: 0 }}>
-                    2.19X
+                    {lastThreeGames[1]
+                      ? lastThreeGames[1].result === "win"
+                        ? Number(lastThreeGames[1].win_chances).toFixed(4)
+                        : lastThreeGames[1].amount
+                      : "N/A"}
                   </p>
                 </div>
               </span>
@@ -235,7 +292,11 @@ function Crash(props) {
               >
                 <div
                   style={{
-                    background: "orange",
+                    background: lastThreeGames[2]
+                      ? lastThreeGames[2].result === "win"
+                        ? "lawngreen"
+                        : "red"
+                      : "gray",
                     borderRadius: 100,
                     width: 13,
                     height: 13,
@@ -244,10 +305,14 @@ function Crash(props) {
                 />
                 <div>
                   <p style={{ color: "gray", fontSize: 13, margin: 0 }}>
-                    5687177
+                    {lastThreeGames[2] ? Number(lastThreeGames[2].amount).toFixed(4) : "N/A"}
                   </p>
                   <p style={{ color: "lawngreen", fontSize: 13, margin: 0 }}>
-                    2.19X
+                    {lastThreeGames[2]
+                      ? lastThreeGames[2].result === "win"
+                        ? Number(lastThreeGames[2].win_chances).toFixed(4)
+                        : lastThreeGames[2].amount
+                      : "N/A"}
                   </p>
                 </div>
               </span>
@@ -292,57 +357,6 @@ function Crash(props) {
               }}
             >
               <div style={{ width: "fit-content" }}>
-                <div style={{ display: "flex", justifyContent: "center" }}>
-                  <div style={{ display: "flex" }}>
-                    <button
-                      style={{
-                        padding: "10px 50px",
-                        marginRight: 15,
-                        color: mode === "Manual" ? "white" : "gray",
-                        background:
-                          mode === "Manual" ? "rgb(40 40 40)" : "black",
-                        border: "none",
-                        borderRadius: 5,
-                        cursor: "pointer",
-                      }}
-                      onClick={() => setMode("Manual")}
-                    >
-                      <div
-                        style={{
-                          fontSize: 12,
-                          cursor: "pointer",
-                          fontWeight: 700,
-                          textAlign: "center",
-                        }}
-                      >
-                        Manual
-                      </div>
-                    </button>
-                    <button
-                      style={{
-                        padding: "10px 50px",
-                        color: mode === "Auto" ? "white" : "gray",
-                        background: mode === "Auto" ? "rgb(40 40 40)" : "black",
-                        border: "none",
-                        borderRadius: 5,
-                        cursor: "pointer",
-                      }}
-                      onClick={() => setMode("Auto")}
-                    >
-                      <div
-                        style={{
-                          fontSize: 12,
-                          cursor: "pointer",
-                          fontWeight: 700,
-                          textAlign: "center",
-                        }}
-                      >
-                        Auto
-                      </div>
-                    </button>
-                  </div>
-                </div>
-
                 <div style={{ marginTop: 30 }}>
                   <div
                     style={{
@@ -377,7 +391,7 @@ function Crash(props) {
                           color: "gray",
                         }}
                       >
-                        0.00000BTC
+                        {props.auth.balance} BNB
                       </p>
                     </div>
                   </div>
@@ -403,7 +417,7 @@ function Crash(props) {
                           margin: "auto 10px auto",
                         }}
                       >
-                        Rs
+                        BNB
                       </p>
                       <TextField
                         InputProps={{
@@ -471,122 +485,16 @@ function Crash(props) {
                   </div>
                 </div>
 
-                {mode === "Manual" ? (
-                  <>
-                    <div style={{ margin: "40px 0" }}>
-                      <div
-                        style={{
-                          display: "flex",
-                          margin: 10,
-                          justifyContent: "space-between",
-                        }}
-                      >
-                        <div>
-                          <p
-                            style={{
-                              fontSize: ".875rem",
-                              fontWeight: 400,
-                              alignItems: "center",
-                              height: "1rem",
-                              color: "gray",
-                            }}
-                          >
-                            Payout
-                          </p>
-                        </div>
-                        <div>
-                          <p
-                            style={{
-                              fontSize: ".875rem",
-                              fontWeight: 400,
-                              alignItems: "center",
-                              height: "1rem",
-                              color: "gray",
-                            }}
-                          >
-                            Chance 50.00000%
-                          </p>
-                        </div>
-                      </div>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          background: "#161616",
-                          padding: 10,
-                          alignItems: "center",
-                        }}
-                      >
-                        <div>
-                          <TextField
-                            InputProps={{
-                              disableUnderline: true,
-                              sx: {
-                                fontSize: 16,
-                                color: "white",
-                                outline: "none",
-                                background: "none",
-                                border: "none",
-                              },
-                            }}
-                            variant="standard"
-                            type="number"
-                            value={payout}
-                            onChange={(e) => setPayout(e.target.value)}
-                          />
-                        </div>
-
-                        <div>
-                          <CloseIcon
-                            style={{ color: "lawngreen", cursor: "pointer" }}
-                            onClick={() => setPayout(0)}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <button
+                <>
+                  <div style={{ margin: "40px 0" }}>
+                    <div
                       style={{
-                        width: "100%",
                         display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        background:
-                          "linear-gradient(66deg, rgba(255,213,0,1) 0%, rgba(140,253,45,1) 100%)",
-                        border: "none",
-                        color: "black",
-                        fontWeight: 700,
-                        fontSize: 17,
-                        padding: 20,
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        if (!props.auth.isAuthenticated) {
-                          setOpenModal(true);
-                          setOpenModalFor("login");
-                        } else if (props.auth.balance === 0) {
-                          toast.error("Oops! insufficient balance", {
-                            position: "top-center",
-                            autoClose: 5000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            progress: undefined,
-                            theme: "colored",
-                          });
-                        } else {
-                          handleClick();
-                        }
+                        margin: 10,
+                        justifyContent: "space-between",
                       }}
                     >
-                      {crash ? "Play Again!" : "Start Auto Bet"}
-                    </button>
-                  </>
-                ) : (
-                  <>
-                    <div>
-                      <div style={{ margin: "15px 0" }}>
+                      <div>
                         <p
                           style={{
                             fontSize: ".875rem",
@@ -596,217 +504,21 @@ function Crash(props) {
                             color: "gray",
                           }}
                         >
-                          Number Of Bets
+                          Crash Point
                         </p>
-                      </div>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          background: "#161616",
-                          padding: 10,
-                          alignItems: "center",
-                        }}
-                      >
-                        <div>
-                          <TextField
-                            InputProps={{
-                              disableUnderline: true,
-                              sx: {
-                                fontSize: 16,
-                                color: "white",
-                                outline: "none",
-                                background: "none",
-                                border: "none",
-                              },
-                            }}
-                            variant="standard"
-                            type="number"
-                            value={numberOfBets}
-                            onChange={(e) => setNumberOfBets(e.target.value)}
-                          />
-                        </div>
-
-                        <div style={{ display: "flex" }}>
-                          <div
-                            style={{
-                              color: "#dedede",
-                              background: "#3c3939",
-                              padding: "5px 8px",
-                              borderRadius: 5,
-                              margin: "0 5px",
-                              fontWeight: 600,
-                              cursor: "pointer",
-                            }}
-                            onClick={() => setNumberOfBets(0)}
-                          >
-                            0
-                          </div>
-
-                          <div
-                            style={{
-                              color: "#dedede",
-                              background: "#3c3939",
-                              padding: "5px 8px",
-                              borderRadius: 5,
-                              margin: "0 5px",
-                              fontWeight: 600,
-                              cursor: "pointer",
-                            }}
-                            onClick={() => setNumberOfBets(10)}
-                          >
-                            10
-                          </div>
-                          <div
-                            style={{
-                              color: "#dedede",
-                              background: "#3c3939",
-                              padding: "5px 8px",
-                              borderRadius: 5,
-                              margin: "0 5px",
-                              fontWeight: 600,
-                              cursor: "pointer",
-                            }}
-                            onClick={() => setNumberOfBets(100)}
-                          >
-                            100
-                          </div>
-                        </div>
                       </div>
                     </div>
 
-                    <div>
-                      <div style={{ margin: "15px 0" }}>
-                        <p
-                          style={{
-                            fontSize: ".875rem",
-                            fontWeight: 400,
-                            alignItems: "center",
-                            height: "1rem",
-                            color: "gray",
-                          }}
-                        >
-                          On win
-                        </p>
-                      </div>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          background: "#161616",
-                          padding: 10,
-                          alignItems: "center",
-                        }}
-                      >
-                        <div
-                          style={{
-                            background: "#111111",
-                            padding: "5px 20px",
-                            display: "flex",
-                            marginRight: 20,
-                            borderRadius: 5,
-                            alignItems: "center",
-                          }}
-                        >
-                          <div
-                            style={{
-                              cursor: "pointer",
-                            }}
-                            onClick={() => setLockOnWinInput(!lockOnWinInput)}
-                          >
-                            {lockOnWinInput ? (
-                              <HttpsIcon
-                                style={{
-                                  color: "cornflowerblue",
-                                  marginRight: 10,
-                                }}
-                              />
-                            ) : (
-                              <LockOpenIcon
-                                style={{ color: "lawngreen", marginRight: 10 }}
-                              />
-                            )}
-                          </div>
-                          <div>
-                            <p
-                              style={{
-                                color: "gray",
-                                fontSize: 12,
-                              }}
-                            >
-                              Reset
-                            </p>
-                            <p
-                              style={{
-                                color: "white",
-                                fontSize: 12,
-                              }}
-                            >
-                              Increased By
-                            </p>
-                          </div>
-                        </div>
-                        <div style={{ width: "40%" }}>
-                          <TextField
-                            InputProps={{
-                              disableUnderline: true,
-                              sx: {
-                                fontSize: 16,
-                                color: "white",
-                                outline: "none",
-                                background: "none",
-                                border: "none",
-                              },
-                            }}
-                            variant="standard"
-                            value={onWinPercentage}
-                            type="number"
-                            onChange={(e) => setOnWinPercentage(e.target.value)}
-                            disabled={lockOnWinInput}
-                          />
-                        </div>
-                        <div>
-                          <p style={{ color: "lawngreen" }}>%</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div style={{ margin: "15px 0" }}>
-                        <p
-                          style={{
-                            fontSize: ".875rem",
-                            fontWeight: 400,
-                            alignItems: "center",
-                            height: "1rem",
-                            color: "gray",
-                          }}
-                        >
-                          Stop on win
-                        </p>
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          background: "#161616",
-                          padding: 10,
-                          alignItems: "center",
-                        }}
-                      >
-                        <p
-                          style={{
-                            background: "#509c06",
-                            color: "white",
-                            borderRadius: 10,
-                            padding: "1px 4px",
-                            marginRight: 10,
-                            fontSize: 12,
-                          }}
-                        >
-                          Rs
-                        </p>
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        background: "#161616",
+                        padding: 10,
+                        alignItems: "center",
+                      }}
+                    >
+                      <div>
                         <TextField
                           InputProps={{
                             disableUnderline: true,
@@ -819,205 +531,58 @@ function Crash(props) {
                             },
                           }}
                           variant="standard"
-                          value={stopOnWinAmount}
                           type="number"
-                          onChange={(e) => setStopOnWinAmount(e.target.value)}
+                          value={payout}
+                          onChange={(e) => setPayout(e.target.value)}
+                        />
+                      </div>
+
+                      <div>
+                        <CloseIcon
+                          style={{ color: "lawngreen", cursor: "pointer" }}
+                          onClick={() => setPayout(0)}
                         />
                       </div>
                     </div>
-
-                    <div>
-                      <div style={{ margin: "15px 0" }}>
-                        <p
-                          style={{
-                            fontSize: ".875rem",
-                            fontWeight: 400,
-                            alignItems: "center",
-                            height: "1rem",
-                            color: "gray",
-                          }}
-                        >
-                          On Lose
-                        </p>
-                      </div>
-
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          background: "#161616",
-                          padding: 10,
-                          alignItems: "center",
-                        }}
-                      >
-                        <div
-                          style={{
-                            background: "#111111",
-                            padding: "5px 20px",
-                            display: "flex",
-                            marginRight: 20,
-                            borderRadius: 5,
-                            alignItems: "center",
-                          }}
-                        >
-                          <div
-                            style={{
-                              cursor: "pointer",
-                            }}
-                            onClick={() => setLockOnLoseInput(!lockOnLoseInput)}
-                          >
-                            {lockOnLoseInput ? (
-                              <HttpsIcon
-                                style={{
-                                  color: "cornflowerblue",
-                                  marginRight: 10,
-                                }}
-                              />
-                            ) : (
-                              <LockOpenIcon
-                                style={{ color: "lawngreen", marginRight: 10 }}
-                              />
-                            )}
-                          </div>
-                          <div>
-                            <p
-                              style={{
-                                color: "gray",
-                                fontSize: 12,
-                              }}
-                            >
-                              Reset
-                            </p>
-                            <p
-                              style={{
-                                color: "white",
-                                fontSize: 12,
-                              }}
-                            >
-                              Increased By
-                            </p>
-                          </div>
-                        </div>
-                        <div style={{ width: "40%" }}>
-                          <TextField
-                            InputProps={{
-                              disableUnderline: true,
-                              sx: {
-                                fontSize: 16,
-                                color: "white",
-                                outline: "none",
-                                background: "none",
-                                border: "none",
-                              },
-                            }}
-                            variant="standard"
-                            value={onLosePercentage}
-                            type="number"
-                            onChange={(e) =>
-                              setOnLosePercentage(e.target.value)
-                            }
-                            disabled={lockOnLoseInput}
-                          />
-                        </div>
-                        <div>
-                          <p style={{ color: "lawngreen" }}>%</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <div style={{ margin: "15px 0" }}>
-                        <p
-                          style={{
-                            fontSize: ".875rem",
-                            fontWeight: 400,
-                            alignItems: "center",
-                            height: "1rem",
-                            color: "gray",
-                          }}
-                        >
-                          Stop on lose
-                        </p>
-                      </div>
-                      <div
-                        style={{
-                          display: "flex",
-                          background: "#161616",
-                          padding: 10,
-                          alignItems: "center",
-                        }}
-                      >
-                        <p
-                          style={{
-                            background: "#509c06",
-                            color: "white",
-                            borderRadius: 10,
-                            padding: "1px 4px",
-                            marginRight: 10,
-                            fontSize: 12,
-                          }}
-                        >
-                          Rs
-                        </p>
-                        <TextField
-                          InputProps={{
-                            disableUnderline: true,
-                            sx: {
-                              fontSize: 16,
-                              color: "white",
-                              outline: "none",
-                              background: "none",
-                              border: "none",
-                            },
-                          }}
-                          variant="standard"
-                          value={stopOnLoseAmount}
-                          type="number"
-                          onChange={(e) => setStopOnLoseAmount(e.target.value)}
-                        />
-                      </div>
-                    </div>
-
-                    <button
-                      style={{
-                        width: "100%",
-                        display: "flex",
-                        justifyContent: "center",
-                        alignItems: "center",
-                        background:
-                          "linear-gradient(66deg, rgba(255,213,0,1) 0%, rgba(140,253,45,1) 100%)",
-                        border: "none",
-                        color: "black",
-                        fontWeight: 700,
-                        marginTop: 20,
-                        fontSize: 17,
-                        padding: 20,
-                        cursor: "pointer",
-                      }}
-                      onClick={() => {
-                        if (!props.auth.isAuthenticated) {
-                          setOpenModal(true);
-                          setOpenModalFor("login");
-                        } else if (props.auth.balance === 0) {
-                          toast.error("Oops! insufficient balance", {
-                            position: "top-center",
-                            autoClose: 5000,
-                            hideProgressBar: false,
-                            closeOnClick: true,
-                            pauseOnHover: true,
-                            draggable: true,
-                            progress: undefined,
-                            theme: "colored",
-                          });
-                        } else {
-                          handleClick();
-                        }
-                      }}
-                    >
-                      {crash ? "Play Again!" : "Start Auto Bet"}
-                    </button>
-                  </>
-                )}
+                  </div>
+                  <button
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      justifyContent: "center",
+                      alignItems: "center",
+                      background:
+                        "linear-gradient(66deg, rgba(255,213,0,1) 0%, rgba(140,253,45,1) 100%)",
+                      border: "none",
+                      color: "black",
+                      fontWeight: 700,
+                      fontSize: 17,
+                      padding: 20,
+                      cursor: "pointer",
+                    }}
+                    onClick={() => {
+                      if (!props.auth.isAuthenticated) {
+                        setOpenModal(true);
+                        setOpenModalFor("login");
+                      } else if (props.auth.balance === 0) {
+                        toast.error("Oops! insufficient balance", {
+                          position: "top-center",
+                          autoClose: 5000,
+                          hideProgressBar: false,
+                          closeOnClick: true,
+                          pauseOnHover: true,
+                          draggable: true,
+                          progress: undefined,
+                          theme: "colored",
+                        });
+                      } else {
+                        handleClick();
+                      }
+                    }}
+                  >
+                    {crash ? "Play Again!" : "Start Auto Bet"}
+                  </button>
+                </>
               </div>
             </Box>
             <Box
@@ -1079,7 +644,7 @@ function Crash(props) {
                       textAlign: "center",
                     }}
                   >
-                    <p
+                    {/* <p
                       style={{
                         fontSize: "50px",
                         color: "#ffbe00",
@@ -1089,13 +654,42 @@ function Crash(props) {
                       }}
                     >
                       Crash
-                    </p>
+                    </p> */}
                     <img
                       src="/explosion.gif"
                       width={120}
                       height={120}
                       alt="explosion gif"
                     />
+                    {payout > maxNumber ? (
+                      <p
+                        style={{
+                          color: "#f82424",
+                          fontSize: 35,
+                          fontWeight: 600,
+                          margin: 0,
+                          background: "rgba(128,128,128,0.7)",
+                          padding: "10px 20px",
+                          borderRadius: 20,
+                        }}
+                      >
+                        You Lose
+                      </p>
+                    ) : (
+                      <p
+                        style={{
+                          color: "lawngreen",
+                          fontSize: 35,
+                          fontWeight: 600,
+                          margin: 0,
+                          background: "rgba(128,128,128,0.7)",
+                          padding: "10px 20px",
+                          borderRadius: 20,
+                        }}
+                      >
+                        You Win
+                      </p>
+                    )}
                   </div>
                 )}
               </div>
@@ -1118,4 +712,4 @@ const mapStateToProps = (state) => ({
   error: state.error.error,
 });
 
-export default connect(mapStateToProps)(Crash);
+export default connect(mapStateToProps, { addGame })(Crash);

@@ -4,3 +4,9 @@ export const changeTheme = () => {
     type: CHANGE_THEME,
   };
 };
+
+export const addGame = () => {
+  return {
+    type: CHANGE_THEME,
+  };
+};
